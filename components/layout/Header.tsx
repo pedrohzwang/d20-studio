@@ -2,6 +2,8 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Navbar,
   NavbarBrand,
@@ -19,24 +21,47 @@ import { useEffect, useState } from "react";
 export default function Header() {
   const { data: session } = useSession();
   const { theme, setTheme } = useTheme();
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  const navLinks = [
+    { href: "/dashboard", label: "Dashboard" },
+    { href: "/dashboard/editor", label: "Editor" },
+  ];
+
   return (
     <Navbar isBordered maxWidth="full">
       <NavbarBrand>
-        <div className="flex items-center gap-2">
+        <Link href="/dashboard" className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gradient-to-br from-purple-600 to-pink-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">
             D20
           </div>
           <p className="font-bold text-xl bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             D20 Studio
           </p>
-        </div>
+        </Link>
       </NavbarBrand>
+
+      <NavbarContent className="hidden sm:flex gap-4" justify="center">
+        {navLinks.map((link) => (
+          <NavbarItem key={link.href} isActive={pathname === link.href}>
+            <Link
+              href={link.href}
+              className={`text-sm font-medium transition-colors ${
+                pathname === link.href
+                  ? "text-purple-600 dark:text-purple-400"
+                  : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
+              }`}
+            >
+              {link.label}
+            </Link>
+          </NavbarItem>
+        ))}
+      </NavbarContent>
 
       <NavbarContent justify="end">
         <NavbarItem>

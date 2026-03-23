@@ -77,25 +77,25 @@ User → Next.js Frontend → API Routes → Google Drive API
 
 #### Tarefas
 1. **Setup do Projeto**
-   - [ ] Inicializar projeto Next.js 14 com TypeScript
-   - [ ] Configurar Tailwind CSS
-   - [ ] Instalar shadcn/ui base components
-   - [ ] Configurar ESLint e Prettier
-   - [ ] Setup de variáveis de ambiente (.env.local)
+   - [x] Inicializar projeto Next.js 14 com TypeScript
+   - [x] Configurar Tailwind CSS
+   - [x] Instalar shadcn/ui base components (usando HeroUI v3)
+   - [x] Configurar ESLint e Prettier
+   - [x] Setup de variáveis de ambiente (.env.local)
 
 2. **Autenticação**
-   - [ ] Configurar NextAuth.js
-   - [ ] Setup Google OAuth 2.0 (Client ID e Secret)
-   - [ ] Criar página de login (`/login`)
-   - [ ] Implementar proteção de rotas
-   - [ ] Criar layout base com header (logo, nome usuário, logout)
+   - [x] Configurar NextAuth.js
+   - [x] Setup Google OAuth 2.0 (Client ID e Secret)
+   - [x] Criar página de login (`/login`)
+   - [x] Implementar proteção de rotas
+   - [x] Criar layout base com header (logo, nome usuário, logout)
 
 3. **Google Drive - Conexão Básica**
-   - [ ] Configurar Google Drive API credentials
-   - [ ] Implementar `StorageProvider` interface
-   - [ ] Criar `GoogleDriveStorage` class
-   - [ ] Testar leitura/escrita básica de arquivos
-   - [ ] Implementar error handling para API do Drive
+   - [x] Configurar Google Drive API credentials
+   - [x] Implementar `StorageProvider` interface
+   - [x] Criar `GoogleDriveStorage` class
+   - [ ] Testar leitura/escrita básica de arquivos (requer credenciais reais)
+   - [x] Implementar error handling para API do Drive
 
 #### Entregáveis
 - Aplicação com login Google funcional
@@ -114,26 +114,26 @@ User → Next.js Frontend → API Routes → Google Drive API
 
 #### Tarefas
 1. **Interface de Navegação**
-   - [ ] Criar sidebar com lista de arquivos do Drive
+   - [x] Criar sidebar com lista de arquivos do Drive
    - [ ] Implementar navegação de pastas
-   - [ ] Adicionar filtro por tipo de arquivo (.md)
-   - [ ] Estado de "arquivo selecionado"
-   - [ ] Loading states para operações
+   - [x] Adicionar filtro por tipo de arquivo (.md)
+   - [x] Estado de "arquivo selecionado"
+   - [x] Loading states para operações
 
 2. **Editor de Markdown**
-   - [ ] Integrar Monaco Editor ou CodeMirror
-   - [ ] Configurar syntax highlighting para Markdown
-   - [ ] Implementar auto-save (debounced após 2s de inatividade)
-   - [ ] Botão manual "Salvar"
-   - [ ] Indicador de "salvando..." / "salvo"
+   - [x] Integrar Monaco Editor ou CodeMirror (usando CodeMirror via @uiw/react-codemirror)
+   - [x] Configurar syntax highlighting para Markdown
+   - [x] Implementar auto-save (debounced após 2s de inatividade)
+   - [x] Botão manual "Salvar"
+   - [x] Indicador de "salvando..." / "salvo"
    - [ ] Preview de Markdown (opcional para MVP)
 
 3. **Operações CRUD Básicas**
-   - [ ] Criar novo arquivo
-   - [ ] Abrir arquivo existente
-   - [ ] Salvar alterações
-   - [ ] Deletar arquivo (com confirmação)
-   - [ ] Renomear arquivo
+   - [x] Criar novo arquivo
+   - [x] Abrir arquivo existente
+   - [x] Salvar alterações
+   - [x] Deletar arquivo (com confirmação)
+   - [x] Renomear arquivo
 
 #### Entregáveis
 - Editor funcional que lê/escreve no Google Drive
@@ -1106,12 +1106,12 @@ Mês 8+:      MCP + Vector Store (opcional)
 ## ✅ Checklist Final do MVP
 
 ### Funcionalidades
-- [ ] Login com Google
-- [ ] Listar arquivos do Drive
-- [ ] Criar novo arquivo .md
-- [ ] Editar arquivo existente
-- [ ] Salvar no Drive (manual e auto-save)
-- [ ] Deletar arquivo
+- [x] Login com Google
+- [x] Listar arquivos do Drive
+- [x] Criar novo arquivo .md
+- [x] Editar arquivo existente
+- [x] Salvar no Drive (manual e auto-save)
+- [x] Deletar arquivo
 - [ ] Chat com Claude
 - [ ] IA cria documentos via chat
 - [ ] IA edita documentos via chat
@@ -1121,11 +1121,11 @@ Mês 8+:      MCP + Vector Store (opcional)
 
 ### Qualidade
 - [ ] Zero crashes em testes
-- [ ] Responsivo mobile/tablet/desktop
+- [x] Responsivo mobile/tablet/desktop
 - [ ] Performance adequada (< 2s load)
-- [ ] Erros tratados graciosamente
-- [ ] Loading states em todas operações
-- [ ] Feedback visual claro
+- [x] Erros tratados graciosamente
+- [x] Loading states em todas operações
+- [x] Feedback visual claro
 
 ### Documentação
 - [ ] README completo
