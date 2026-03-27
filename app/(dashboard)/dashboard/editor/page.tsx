@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import FileSidebar from "@/components/editor/FileSidebar";
 import Toolbar, { SaveStatus } from "@/components/editor/Toolbar";
+import ChatSidebar from "@/components/chat/ChatSidebar";
 import { DriveFile } from "@/lib/storage/types";
 import { Spinner } from "@heroui/react";
 
@@ -24,6 +25,7 @@ export default function EditorPage() {
     const [content, setContent] = useState("");
     const [loadingContent, setLoadingContent] = useState(false);
     const [saveStatus, setSaveStatus] = useState<SaveStatus>("idle");
+    const [chatOpen, setChatOpen] = useState(false);
     const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const lastSavedContent = useRef("");
 
@@ -78,6 +80,16 @@ export default function EditorPage() {
                 lastSavedContent.current = contentToSave;
                 setSaveStatus("saved");
                 setTimeout(() => setSaveStatus("idle"), 2000);
+
+                // Fire-and-forget metadata extraction in the background
+                fetch("/api/metadata", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        fileId: selectedFile.id,
+                        filename: selectedFile.name,
+                    }),
+                }).catch(() => { /* non-critical */ });
             } catch {
                 setSaveStatus("error");
             }

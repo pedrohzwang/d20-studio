@@ -92,10 +92,13 @@ export class GoogleDriveStorage implements StorageProvider {
     }
   }
 
-  async createFile(name: string, content: string, folderId?: string): Promise<DriveFile> {
+  async createFile(name: string, content: string, folderId?: string, mimeType?: string): Promise<DriveFile> {
+    // If name has no extension, default to .md
+    const finalName = /\.[a-z0-9]+$/i.test(name) ? name : `${name}.md`;
+    const finalMime = mimeType ?? (finalName.endsWith(".json") ? "application/json" : "text/markdown");
     const metadata: Record<string, unknown> = {
-      name: name.endsWith(".md") ? name : `${name}.md`,
-      mimeType: "text/markdown",
+      name: finalName,
+      mimeType: finalMime,
     };
 
     if (folderId) {

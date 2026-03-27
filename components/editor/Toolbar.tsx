@@ -8,9 +8,11 @@ interface ToolbarProps {
   fileName: string;
   saveStatus: SaveStatus;
   onSave: () => void;
+  chatOpen?: boolean;
+  onToggleChat?: () => void;
 }
 
-export default function Toolbar({ fileName, saveStatus, onSave }: ToolbarProps) {
+export default function Toolbar({ fileName, saveStatus, onSave, chatOpen, onToggleChat }: ToolbarProps) {
   const statusLabel: Record<SaveStatus, string> = {
     idle: "",
     saving: "Saving…",
@@ -40,16 +42,30 @@ export default function Toolbar({ fileName, saveStatus, onSave }: ToolbarProps) 
         </span>
       </div>
 
-      <Button
-        size="sm"
-        color="primary"
-        variant="flat"
-        onPress={onSave}
-        isDisabled={saveStatus === "saving"}
-        className="flex-shrink-0"
-      >
-        Save
-      </Button>
+      <div className="flex items-center gap-2 flex-shrink-0">
+        {onToggleChat && (
+          <Button
+            size="sm"
+            variant={chatOpen ? "flat" : "light"}
+            color={chatOpen ? "secondary" : "default"}
+            onPress={onToggleChat}
+            className="flex-shrink-0"
+            aria-label="Toggle DM Assistant"
+          >
+            🎲 Assistant
+          </Button>
+        )}
+        <Button
+          size="sm"
+          color="primary"
+          variant="flat"
+          onPress={onSave}
+          isDisabled={saveStatus === "saving"}
+          className="flex-shrink-0"
+        >
+          Save
+        </Button>
+      </div>
     </div>
   );
 }

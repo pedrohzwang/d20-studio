@@ -9,8 +9,15 @@ interface FileSidebarProps {
   onSelectFile: (file: DriveFile) => void;
 }
 
+interface BreadcrumbEntry {
+  id: string | undefined;
+  name: string;
+}
+
 export default function FileSidebar({ selectedFileId, onSelectFile }: FileSidebarProps) {
   const [files, setFiles] = useState<DriveFile[]>([]);
+  const [folders, setFolders] = useState<DriveFile[]>([]);
+  const [breadcrumb, setBreadcrumb] = useState<BreadcrumbEntry[]>([{ id: undefined, name: "My Drive" }]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
@@ -20,14 +27,19 @@ export default function FileSidebar({ selectedFileId, onSelectFile }: FileSideba
   const [renamingId, setRenamingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
 
-  const fetchFiles = useCallback(async () => {
+  const currentFolderId = breadcrumb[breadcrumb.length - 1].id;
+
+  const fetchContents = useCallback(async (folderId?: string) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/drive/files");
+      const params = new URLSearchParams({ includeFolders: "true" });
+      if (folderId) params.set("folderId", folderId);
+      const res = await fetch(`/api/drive/files?${params}`);
       if (!res.ok) throw new Error("Failed to load files");
       const data = await res.json();
       setFiles(data.files ?? []);
+      setFolders(data.folders ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -36,8 +48,17 @@ export default function FileSidebar({ selectedFileId, onSelectFile }: FileSideba
   }, []);
 
   useEffect(() => {
-    fetchFiles();
-  }, [fetchFiles]);
+    fetchContents(currentFolderId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [breadcrumb]);
+
+  const enterFolder = (folder: DriveFile) => {
+    setBreadcrumb((prev) => [...prev, { id: folder.id, name: folder.name }]);
+  };
+
+  const navigateTo = (index: number) => {
+    setBreadcrumb((prev) => prev.slice(0, index + 1));
+  };
 
   const handleCreate = async () => {
     const name = newFileName.trim();
@@ -47,7 +68,7 @@ export default function FileSidebar({ selectedFileId, onSelectFile }: FileSideba
       const res = await fetch("/api/drive/files", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
+        body: JSON.stringify({ name, folderId: currentFolderId }),
       });
       if (!res.ok) throw new Error("Failed to create file");
       const data = await res.json();
@@ -125,6 +146,28 @@ export default function FileSidebar({ selectedFileId, onSelectFile }: FileSideba
         </Button>
       </div>
 
+      {/* Breadcrumb */}
+      {breadcrumb.length > 1 && (
+        <div className="px-3 py-1.5 border-b border-gray-200 dark:border-gray-800 flex items-center gap-1 flex-wrap">
+          {breadcrumb.map((crumb, i) => (
+            <span key={i} className="flex items-center gap-1">
+              {i > 0 && <span className="text-gray-400 text-xs">/</span>}
+              <button
+                className={`text-xs truncate max-w-[80px] ${
+                  i === breadcrumb.length - 1
+                    ? "text-gray-700 dark:text-gray-300 font-medium"
+                    : "text-purple-500 hover:underline"
+                }`}
+                onClick={() => navigateTo(i)}
+                title={crumb.name}
+              >
+                {crumb.name}
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
       {/* New file input */}
       {showNewInput && (
         <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-800">
@@ -168,19 +211,36 @@ export default function FileSidebar({ selectedFileId, onSelectFile }: FileSideba
         {error && (
           <div className="px-4 py-3 text-xs text-red-500">
             {error}
-            <button className="block mt-1 text-purple-500 underline" onClick={fetchFiles}>
+            <button className="block mt-1 text-purple-500 underline" onClick={() => fetchContents(currentFolderId)}>
               Retry
             </button>
           </div>
         )}
 
-        {!loading && !error && files.length === 0 && (
+        {!loading && !error && folders.length === 0 && files.length === 0 && (
           <div className="px-4 py-8 text-center text-xs text-gray-400">
-            No .md files found.
+            No files found.
             <br />
             Create one to get started.
           </div>
         )}
+
+        {/* Folders first */}
+        {folders.map((folder) => (
+          <button
+            key={folder.id}
+            className="w-full text-left px-4 py-2 text-sm flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-gray-700 dark:text-gray-300"
+            onClick={() => enterFolder(folder)}
+          >
+            <svg className="w-3.5 h-3.5 flex-shrink-0 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M10 4H4c-1.11 0-2 .89-2 2v12c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2h-8l-2-2z" />
+            </svg>
+            <span className="truncate">{folder.name}</span>
+            <svg className="w-3 h-3 ml-auto text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        ))}
 
         {files.map((file) => (
           <div key={file.id} className="group relative">

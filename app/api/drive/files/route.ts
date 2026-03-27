@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { GoogleDriveStorage } from "@/lib/storage/GoogleDriveStorage";
 
-// GET /api/drive/files?folderId=<id>  — list .md files
+// GET /api/drive/files?folderId=<id>  — list .md files (+ folders if includeFolders=true)
 export async function GET(request: NextRequest) {
   const session = await getServerSession(authOptions);
 
@@ -13,11 +13,15 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const folderId = searchParams.get("folderId") ?? undefined;
+  const includeFolders = searchParams.get("includeFolders") === "true";
 
   try {
     const storage = new GoogleDriveStorage(session.accessToken);
-    const files = await storage.listFiles(folderId);
-    return NextResponse.json({ files });
+    const [files, folders] = await Promise.all([
+      storage.listFiles(folderId),
+      includeFolders ? storage.listFolders(folderId) : Promise.resolve([]),
+    ]);
+    return NextResponse.json({ files, folders });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to list files";
     return NextResponse.json({ error: message }, { status: 500 });
