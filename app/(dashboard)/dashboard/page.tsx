@@ -1,11 +1,13 @@
 "use client";
 
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 
 export default function DashboardPage() {
   const { data: session } = useSession();
 
   return (
+    <div className="container mx-auto px-4 py-8">
     <div className="max-w-4xl mx-auto">
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2">
@@ -57,12 +59,22 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="mt-8 p-6 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 text-center">
+      <div className="mt-8 p-6 rounded-lg border-2 border-dashed border-purple-300 dark:border-purple-800 text-center">
         <p className="text-lg font-semibold mb-2">🎲 Ready to start your adventure?</p>
         <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-          Phase 1 authentication is complete. Editor and AI features coming next!
+          Open the editor to create and manage your campaign files in Google Drive.
         </p>
+        <Link
+          href="/dashboard/editor"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+          </svg>
+          Open Editor
+        </Link>
       </div>
+    </div>
     </div>
   );
 }
