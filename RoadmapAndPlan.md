@@ -115,7 +115,7 @@ User → Next.js Frontend → API Routes → Google Drive API
 #### Tarefas
 1. **Interface de Navegação**
    - [x] Criar sidebar com lista de arquivos do Drive
-   - [ ] Implementar navegação de pastas
+   - [x] Implementar navegação de pastas
    - [x] Adicionar filtro por tipo de arquivo (.md)
    - [x] Estado de "arquivo selecionado"
    - [x] Loading states para operações
@@ -126,7 +126,7 @@ User → Next.js Frontend → API Routes → Google Drive API
    - [x] Implementar auto-save (debounced após 2s de inatividade)
    - [x] Botão manual "Salvar"
    - [x] Indicador de "salvando..." / "salvo"
-   - [ ] Preview de Markdown (opcional para MVP)
+   - [ ] Preview de Markdown (opcional para MVP — skipped for MVP)
 
 3. **Operações CRUD Básicas**
    - [x] Criar novo arquivo
@@ -153,33 +153,33 @@ User → Next.js Frontend → API Routes → Google Drive API
 
 #### Tarefas
 1. **Estruturas de Dados**
-   - [ ] Definir interfaces TypeScript para metadata:
+   - [x] Definir interfaces TypeScript para metadata:
      - `NPCMetadata`
      - `SessionMetadata`
      - `LocationMetadata`
      - `ItemMetadata`
      - `GenericMetadata`
-   - [ ] Criar tipo union `DocumentMetadata`
-   - [ ] Definir estrutura do índice de contexto
+   - [x] Criar tipo union `DocumentMetadata`
+   - [x] Definir estrutura do índice de contexto
 
 2. **Parser de Markdown**
-   - [ ] Criar `MarkdownParser` class
-   - [ ] Implementar extração de título (# heading)
-   - [ ] Implementar extração de campos `**Campo:** Valor`
-   - [ ] Implementar detecção de seções (## Headers)
-   - [ ] Implementar extração de listas
+   - [x] Criar `MarkdownParser` class
+   - [x] Implementar extração de título (# heading)
+   - [x] Implementar extração de campos `**Campo:** Valor`
+   - [x] Implementar detecção de seções (## Headers)
+   - [x] Implementar extração de listas
    - [ ] Implementar extração de blockquotes (segredos)
-   - [ ] Criar heurísticas para detectar tipo de documento
+   - [x] Criar heurísticas para detectar tipo de documento
 
 3. **Sistema de Metadata**
-   - [ ] Criar `MetadataExtractor` class
-   - [ ] Implementar extração automática via regex/AST
-   - [ ] Gerar arquivos `.meta.json` no Drive
-   - [ ] Implementar cache de metadata em memória
+   - [x] Criar `MetadataExtractor` class
+   - [x] Implementar extração automática via regex/AST
+   - [x] Gerar arquivos `.meta.json` no Drive
+   - [x] Implementar cache de metadata em memória
    - [ ] Sistema de atualização incremental (detect changes)
 
 4. **Gerenciamento de Arquivos Ocultos**
-   - [ ] Função para listar apenas .md (esconder .meta.json da UI)
+   - [x] Função para listar apenas .md (esconder .meta.json da UI)
    - [ ] Função para sincronizar .md ↔ .meta.json
    - [ ] Limpeza de .meta.json órfãos
 
@@ -200,12 +200,12 @@ User → Next.js Frontend → API Routes → Google Drive API
 
 #### Tarefas
 1. **Context Builder Class**
-   - [ ] Criar `ContextBuilder` class
-   - [ ] Implementar `loadFromDrive()` - carrega todos .meta.json
-   - [ ] Implementar `findByType(type)` - busca por tipo de documento
-   - [ ] Implementar `findByTags(tags)` - busca por tags
+   - [x] Criar `ContextBuilder` class
+   - [x] Implementar `loadFromDrive()` - carrega todos .meta.json
+   - [x] Implementar `findByType(type)` - busca por tipo de documento
+   - [x] Implementar `findByTags(tags)` - busca por tags
    - [ ] Implementar `findByLocation(location)` - busca por localização
-   - [ ] Implementar `searchText(query)` - busca textual simples
+   - [x] Implementar `searchText(query)` - busca textual simples
 
 2. **Sistema de Relacionamentos**
    - [ ] Criar `RelationshipGraph` class
@@ -215,17 +215,17 @@ User → Next.js Frontend → API Routes → Google Drive API
    - [ ] Visualização textual do grafo (para debug)
 
 3. **Contexto Inteligente**
-   - [ ] Implementar `buildContextForQuery(userQuery)`
-   - [ ] Detectar entidades mencionadas na query
+   - [x] Implementar `buildContextForQuery(userQuery)`
+   - [x] Detectar entidades mencionadas na query
    - [ ] Carregar documentos relacionados
    - [ ] Priorizar documentos recentes
-   - [ ] Limitar contexto a ~10k tokens (para Claude)
-   - [ ] Formatar contexto de forma legível para IA
+   - [x] Limitar contexto a ~10k tokens (para Claude)
+   - [x] Formatar contexto de forma legível para IA
 
 4. **Otimizações**
    - [ ] Cache de queries frequentes
    - [ ] Lazy loading de markdown completo
-   - [ ] Invalidação de cache ao salvar
+   - [x] Invalidação de cache ao salvar
 
 #### Entregáveis
 - Sistema de busca contextual funcional
@@ -246,37 +246,37 @@ User → Next.js Frontend → API Routes → Google Drive API
 
 #### Tarefas
 1. **API Routes para Claude**
-   - [ ] Criar `/api/chat` endpoint
+   - [x] Criar `/api/chat` endpoint
    - [ ] Implementar rate limiting básico
-   - [ ] Configurar Anthropic API key
-   - [ ] Error handling e retries
+   - [x] Configurar Anthropic API key
+   - [x] Error handling e retries
    - [ ] Logging de requests (para debug)
 
 2. **Chat Service**
-   - [ ] Criar `ClaudeService` class
-   - [ ] Implementar `sendMessage(message, context)`
-   - [ ] Implementar streaming de respostas (opcional)
-   - [ ] Gerenciar histórico de conversa (últimas 10 msgs)
-   - [ ] Formatar contexto para Claude
+   - [x] Criar `ClaudeService` class
+   - [x] Implementar `sendMessage(message, context)`
+   - [x] Implementar streaming de respostas (opcional)
+   - [x] Gerenciar histórico de conversa (últimas 10 msgs)
+   - [x] Formatar contexto para Claude
 
 3. **UI de Chat**
-   - [ ] Criar sidebar de chat (colapsável em mobile)
-   - [ ] Componente de mensagem (user/assistant)
-   - [ ] Input de texto com envio (Enter)
-   - [ ] Loading indicator
-   - [ ] Display de erros
-   - [ ] Auto-scroll para última mensagem
-   - [ ] Botão "Nova conversa"
+   - [x] Criar sidebar de chat (colapsável em mobile)
+   - [x] Componente de mensagem (user/assistant)
+   - [x] Input de texto com envio (Enter)
+   - [x] Loading indicator
+   - [x] Display de erros
+   - [x] Auto-scroll para última mensagem
+   - [x] Botão "Nova conversa"
 
 4. **Sistema de Prompts**
-   - [ ] Criar `PromptBuilder` class
-   - [ ] Definir system prompt base para D20 Studio
+   - [x] Criar `PromptBuilder` class
+   - [x] Definir system prompt base para D20 Studio
    - [ ] Templates de prompts para ações comuns:
      - Gerar NPC
      - Resumir sessão
      - Sugerir plots
      - Expandir descrição
-   - [ ] Injeção de contexto no prompt
+   - [x] Injeção de contexto no prompt
 
 #### Entregáveis
 - Chat funcional com Claude

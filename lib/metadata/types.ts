@@ -8,6 +8,7 @@ export interface BaseMetadata {
   tags: string[];
   modifiedTime: string;
   summary?: string;
+  secrets?: string[];
   sections: Record<string, string>;
   fields: Record<string, string>;
 }

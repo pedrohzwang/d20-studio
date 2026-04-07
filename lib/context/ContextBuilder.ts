@@ -1,7 +1,20 @@
-import { DocumentMetadata, DocumentType } from "@/lib/metadata/types";
+import {
+  DocumentMetadata,
+  DocumentType,
+  NPCMetadata,
+  SessionMetadata,
+  LocationMetadata,
+  ItemMetadata,
+} from "@/lib/metadata/types";
+import { RelationshipGraph } from "./RelationshipGraph";
+
+const CACHE_MAX_SIZE = 50;
 
 export class ContextBuilder {
   private index: DocumentMetadata[] = [];
+  private graph = new RelationshipGraph();
+  private queryCache = new Map<string, { result: string; timestamp: number }>();
+  private indexVersion = 0;
 
   /**
    * Load all metadata from the /api/metadata endpoint.
@@ -14,12 +27,18 @@ export class ContextBuilder {
     const res = await fetch(url);
     if (!res.ok) return;
     const data = await res.json();
-    if (Array.isArray(data)) this.index = data;
+    if (Array.isArray(data)) {
+      this.index = data;
+      this.graph.build(this.index);
+      this.invalidateCache();
+    }
   }
 
   /** Replace the in-memory index directly (e.g. when data is already fetched). */
   setIndex(data: DocumentMetadata[]): void {
     this.index = data;
+    this.graph.build(this.index);
+    this.invalidateCache();
   }
 
   findByType(type: DocumentType): DocumentMetadata[] {
@@ -29,6 +48,27 @@ export class ContextBuilder {
   findByTags(tags: string[]): DocumentMetadata[] {
     const lower = tags.map((t) => t.toLowerCase());
     return this.index.filter((d) => d.tags.some((tag) => lower.includes(tag)));
+  }
+
+  findByLocation(location: string): DocumentMetadata[] {
+    const q = location.toLowerCase();
+    return this.index.filter((d) => {
+      switch (d.type) {
+        case "npc":
+          return (d as NPCMetadata).location?.toLowerCase().includes(q);
+        case "session":
+          return (d as SessionMetadata).location?.toLowerCase().includes(q);
+        case "location":
+          return (
+            d.title.toLowerCase().includes(q) ||
+            (d as LocationMetadata).region?.toLowerCase().includes(q)
+          );
+        case "item":
+          return (d as ItemMetadata).owner?.toLowerCase().includes(q);
+        default:
+          return false;
+      }
+    });
   }
 
   searchText(query: string): DocumentMetadata[] {
@@ -50,8 +90,24 @@ export class ContextBuilder {
   buildContextForQuery(query: string, charBudget = 8000): string {
     if (this.index.length === 0) return "";
 
+    // Check cache
+    const cacheKey = `${query}:${charBudget}`;
+    const cached = this.queryCache.get(cacheKey);
+    if (cached) return cached.result;
+
     // Score each document by how many query terms it matches
     const terms = query.toLowerCase().split(/\s+/).filter((t) => t.length > 2);
+
+    // Collect entities mentioned in the query for graph expansion
+    const relatedKeys = new Set<string>();
+    for (const doc of this.index) {
+      const titleLower = doc.title.toLowerCase();
+      if (terms.some((t) => titleLower.includes(t))) {
+        const neighbors = this.graph.findRelated(doc.title, 1);
+        for (const n of neighbors) relatedKeys.add(n);
+      }
+    }
+
     const scored = this.index.map((doc) => {
       const text = [
         doc.title,
@@ -62,10 +118,23 @@ export class ContextBuilder {
         .join(" ")
         .toLowerCase();
 
-      const score = terms.reduce((acc, term) => {
+      let score = terms.reduce((acc, term) => {
         const matches = text.split(term).length - 1;
         return acc + matches;
       }, 0);
+
+      // Boost documents that are graph-related to a matched entity
+      if (relatedKeys.has(doc.title.toLowerCase())) {
+        score += 0.5;
+      }
+
+      // Recency bonus: newer documents get a small boost (max +1 for docs modified today)
+      if (doc.modifiedTime) {
+        const ageMs = Date.now() - new Date(doc.modifiedTime).getTime();
+        const ageDays = ageMs / (1000 * 60 * 60 * 24);
+        // Exponential decay: 1.0 for today, ~0.5 at 7 days, ~0.25 at 14 days
+        score += Math.max(0, Math.exp(-ageDays / 10));
+      }
 
       return { doc, score };
     });
@@ -94,7 +163,27 @@ export class ContextBuilder {
       used += chunk.length;
     }
 
-    return parts.join("\n---\n");
+    const result = parts.join("\n---\n");
+
+    // Store in cache (LRU eviction)
+    if (this.queryCache.size >= CACHE_MAX_SIZE) {
+      // Remove oldest entry
+      const oldest = [...this.queryCache.entries()].sort((a, b) => a[1].timestamp - b[1].timestamp)[0];
+      if (oldest) this.queryCache.delete(oldest[0]);
+    }
+    this.queryCache.set(cacheKey, { result, timestamp: Date.now() });
+
+    return result;
+  }
+
+  /** Expose the graph for external consumers. */
+  getGraph(): RelationshipGraph {
+    return this.graph;
+  }
+
+  private invalidateCache(): void {
+    this.queryCache.clear();
+    this.indexVersion++;
   }
 
   private formatDocument(doc: DocumentMetadata): string {

@@ -28,6 +28,8 @@ export class MarkdownParser {
     const type = this.detectType(body, filename, frontmatter);
     const summary = this.extractSummary(body);
 
+    const secrets = this.extractBlockquotes(body);
+
     const base = {
       fileId,
       name: filename,
@@ -36,6 +38,7 @@ export class MarkdownParser {
       tags,
       modifiedTime,
       summary,
+      secrets: secrets.length > 0 ? secrets : undefined,
       sections,
       fields,
     };
@@ -189,6 +192,35 @@ export class MarkdownParser {
     }
 
     return paragraphLines.join(" ").slice(0, 300);
+  }
+
+  /**
+   * Extract blockquotes as DM secrets / hidden notes.
+   * Lines starting with `> ` are collected into grouped blockquotes.
+   */
+  extractBlockquotes(content: string): string[] {
+    const secrets: string[] = [];
+    let current: string[] = [];
+
+    for (const line of content.split("\n")) {
+      const trimmed = line.trim();
+      if (trimmed.startsWith("> ")) {
+        current.push(trimmed.slice(2).trim());
+      } else if (trimmed === ">") {
+        // empty blockquote continuation line
+        current.push("");
+      } else {
+        if (current.length > 0) {
+          secrets.push(current.join(" ").trim());
+          current = [];
+        }
+      }
+    }
+    if (current.length > 0) {
+      secrets.push(current.join(" ").trim());
+    }
+
+    return secrets.filter((s) => s.length > 0);
   }
 
   private extractListField(content: string, headings: string[]): string[] {

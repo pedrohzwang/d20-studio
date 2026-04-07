@@ -20,6 +20,7 @@ export class MetadataExtractor {
   /**
    * Extract metadata from content and persist it as a hidden .meta.json file
    * alongside the markdown file in Drive.
+   * Skips extraction if modifiedTime hasn't changed (incremental detection).
    */
   async extractAndSave(
     fileId: string,
@@ -28,6 +29,12 @@ export class MetadataExtractor {
     modifiedTime: string,
     folderId?: string
   ): Promise<DocumentMetadata> {
+    // Incremental change detection: skip if unmodified
+    const cached = cache.get(fileId);
+    if (cached && cached.modifiedTime === modifiedTime) {
+      return cached;
+    }
+
     const metadata = parser.parse(content, filename, fileId, modifiedTime);
     cache.set(fileId, metadata);
     await this.saveMetaFile(metadata, folderId);
@@ -59,7 +66,7 @@ export class MetadataExtractor {
     try {
       const files = await this.listMetaFiles(folderId);
       const results = await Promise.allSettled(
-        files.map(async (f) => {
+        files.map(async (f: { id: string; name: string }) => {
           const raw = await this.storage.readFile(f.id);
           return JSON.parse(raw) as DocumentMetadata;
         })
@@ -74,6 +81,58 @@ export class MetadataExtractor {
 
   invalidate(fileId: string) {
     cache.delete(fileId);
+  }
+
+  /**
+   * Sync metadata files with actual .md files in the folder.
+   * - Deletes orphan .meta.json files (where the source .md no longer exists)
+   * - Triggers extraction for .md files missing metadata
+   */
+  async syncMetadata(folderId?: string): Promise<{ extracted: number; deleted: number }> {
+    const [mdFiles, metaFiles] = await Promise.all([
+      this.storage.listFiles(folderId),
+      this.listMetaFiles(folderId),
+    ]);
+
+    const mdFileIds = new Set(mdFiles.map((f) => f.id));
+    let deleted = 0;
+    let extracted = 0;
+
+    // Delete orphan .meta.json files
+    const deletePromises = metaFiles
+      .filter((meta) => {
+        const sourceId = meta.name.replace(META_SUFFIX, "");
+        return !mdFileIds.has(sourceId);
+      })
+      .map(async (meta) => {
+        try {
+          await this.storage.deleteFile(meta.id);
+          deleted++;
+        } catch {
+          // ignore delete failures
+        }
+      });
+    await Promise.allSettled(deletePromises);
+
+    // Find .md files missing metadata and extract
+    const existingMetaSourceIds = new Set(
+      metaFiles.map((m) => m.name.replace(META_SUFFIX, ""))
+    );
+
+    const extractPromises = mdFiles
+      .filter((md) => !existingMetaSourceIds.has(md.id))
+      .map(async (md) => {
+        try {
+          const content = await this.storage.readFile(md.id);
+          await this.extractAndSave(md.id, md.name, content, md.modifiedTime ?? new Date().toISOString(), folderId);
+          extracted++;
+        } catch {
+          // ignore extraction failures
+        }
+      });
+    await Promise.allSettled(extractPromises);
+
+    return { extracted, deleted };
   }
 
   // ------------------------------------------------------------------
@@ -116,7 +175,7 @@ export class MetadataExtractor {
     }
   }
 
-  private async listMetaFiles(folderId?: string) {
+  private async listMetaFiles(folderId?: string): Promise<{ id: string; name: string }[]> {
     const parentQuery = folderId ? `'${folderId}' in parents` : "'root' in parents";
     const params = new URLSearchParams({
       q: `${parentQuery} and name contains '${META_SUFFIX}' and trashed=false`,
