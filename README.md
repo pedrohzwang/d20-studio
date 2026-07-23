@@ -90,7 +90,7 @@ d20-studio/
 
 ## 🎨 Features
 
-### Phase 1 (Current - Authentication & Base UI) ✅
+### Phase 1 - Sprint 1.1 (Authentication & Base UI) ✅
 - [x] Next.js 14 with TypeScript setup
 - [x] Hero UI v3 component library integration
 - [x] Google OAuth authentication
@@ -99,10 +99,22 @@ d20-studio/
 - [x] Responsive design
 - [x] User profile management
 
+### Phase 1 - Sprint 1.2 (Free-Text Editor & Google Drive) 🚧 In Progress
+- [ ] Free-text editor (saves as Markdown to Drive, displays as rich text)
+- [ ] File sidebar with Drive navigation
+- [ ] CRUD operations (create, open, save, delete, rename)
+- [ ] Auto-save with debounce
+
+### Phase 1 - Sprint 1.3 (Campaign Path Config & Scoped Drive) 🚧 In Progress
+- [ ] Drive folder path configuration modal
+- [ ] localStorage persistence (JSON format)
+- [ ] Campaign count on Dashboard
+- [ ] Scoped navigation (only campaign folder, not full Drive)
+
 ### Upcoming Phases
-- **Phase 2**: Markdown editor with Google Drive integration
-- **Phase 3**: AI-powered context extraction
-- **Phase 4**: Claude API integration for campaign assistance
+- **Phase 2**: AI-powered context and metadata extraction
+- **Phase 3**: Claude API integration for campaign assistance
+- **Phase 4**: UX polish, testing and documentation
 - **Phase 5**: Voice transcription and commands
 
 See [`RoadmapAndPlan.md`](RoadmapAndPlan.md) for complete roadmap.
@@ -130,10 +142,6 @@ Theme configuration is in [`tailwind.config.ts`](tailwind.config.ts).
 - [`docs/Phase1.md`](docs/Phase1.md) - Detailed implementation log with Google OAuth setup guide
 - [`RoadmapAndPlan.md`](RoadmapAndPlan.md) - Complete project roadmap and technical specifications
 
-## 🤝 Contributing
-
-This is currently in early development (Phase 1). Contributions will be welcome once we reach beta.
-
 ## 📄 License
 
 [To be determined]
@@ -149,6 +157,6 @@ For issues and questions, please refer to the documentation or create an issue i
 
 ---
 
-**Current Status**: Phase 1 - Authentication & Base UI ✅ Complete
+**Current Status**: Phase 1 - Sprint 1.2 & 1.3 🚧 In Progress
 
-**Next Up**: Phase 1 Sprint 2 - Markdown Editor & Google Drive Integration
+**Next Up**: Free-text editor, Drive campaign path configuration, scoped navigation

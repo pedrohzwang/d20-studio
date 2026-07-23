@@ -1,10 +1,41 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useDashboardCampaignConfig } from "../layout";
 
 export default function DashboardPage() {
   const { data: session } = useSession();
+  const { config } = useDashboardCampaignConfig();
+  const [campaignCount, setCampaignCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!config) {
+      setCampaignCount(null);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function fetchCount() {
+      try {
+        const params = new URLSearchParams({
+          folderId: config!.campaignFolderId,
+          includeFolders: "true",
+        });
+        const res = await fetch(`/api/drive/files?${params}`);
+        if (!res.ok) throw new Error("Failed");
+        const data = await res.json();
+        if (!cancelled) setCampaignCount((data.folders ?? []).length);
+      } catch {
+        if (!cancelled) setCampaignCount(0);
+      }
+    }
+
+    fetchCount();
+    return () => { cancelled = true; };
+  }, [config]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -27,9 +58,13 @@ export default function DashboardPage() {
           </div>
           <h3 className="text-lg font-semibold mb-2">Campaigns</h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Manage your RPG campaigns
+            {config
+              ? `Folders found in "${config.campaignFolderName}"`
+              : "Configure your campaign folder to see campaigns"}
           </p>
-          <p className="text-2xl font-bold mt-4 text-purple-600">0</p>
+          <p className="text-2xl font-bold mt-4 text-purple-600">
+            {campaignCount ?? "—"}
+          </p>
         </div>
 
         <div className="p-6 rounded-lg border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">

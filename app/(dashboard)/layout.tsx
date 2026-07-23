@@ -1,9 +1,26 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { createContext, useContext, useEffect } from "react";
 import Header from "@/components/layout/Header";
+import CampaignFolderModal from "@/components/config/CampaignFolderModal";
+import { useCampaignConfig } from "@/lib/hooks/useCampaignConfig";
+import { CampaignConfig } from "@/lib/config/campaignConfig";
+
+interface CampaignConfigContextValue {
+  config: CampaignConfig | null;
+  isValidating: boolean;
+}
+
+const CampaignConfigContext = createContext<CampaignConfigContextValue>({
+  config: null,
+  isValidating: true,
+});
+
+export function useDashboardCampaignConfig() {
+  return useContext(CampaignConfigContext);
+}
 
 export default function DashboardLayout({
   children,
@@ -12,6 +29,7 @@ export default function DashboardLayout({
 }) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const { config, needsConfig, isValidating, setConfig } = useCampaignConfig();
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -19,7 +37,7 @@ export default function DashboardLayout({
     }
   }, [status, router]);
 
-  if (status === "loading") {
+  if (status === "loading" || (status === "authenticated" && isValidating)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
@@ -35,9 +53,12 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      <main className="flex-1 flex flex-col">{children}</main>
-    </div>
+    <CampaignConfigContext.Provider value={{ config, isValidating }}>
+      <div className="min-h-screen bg-background flex flex-col">
+        <Header />
+        <main className="flex-1 flex flex-col">{children}</main>
+        <CampaignFolderModal isOpen={needsConfig} onConfirm={setConfig} />
+      </div>
+    </CampaignConfigContext.Provider>
   );
 }

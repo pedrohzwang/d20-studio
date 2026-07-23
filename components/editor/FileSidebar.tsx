@@ -7,6 +7,8 @@ import { Button, Input, Spinner } from "@heroui/react";
 interface FileSidebarProps {
   selectedFileId: string | null;
   onSelectFile: (file: DriveFile) => void;
+  rootFolderId?: string;
+  rootFolderName?: string;
 }
 
 interface BreadcrumbEntry {
@@ -14,10 +16,12 @@ interface BreadcrumbEntry {
   name: string;
 }
 
-export default function FileSidebar({ selectedFileId, onSelectFile }: FileSidebarProps) {
+export default function FileSidebar({ selectedFileId, onSelectFile, rootFolderId, rootFolderName }: FileSidebarProps) {
   const [files, setFiles] = useState<DriveFile[]>([]);
   const [folders, setFolders] = useState<DriveFile[]>([]);
-  const [breadcrumb, setBreadcrumb] = useState<BreadcrumbEntry[]>([{ id: undefined, name: "My Drive" }]);
+  const [breadcrumb, setBreadcrumb] = useState<BreadcrumbEntry[]>([
+    { id: rootFolderId, name: rootFolderName || "My Drive" },
+  ]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
@@ -29,7 +33,18 @@ export default function FileSidebar({ selectedFileId, onSelectFile }: FileSideba
 
   const currentFolderId = breadcrumb[breadcrumb.length - 1].id;
 
+  // Reset breadcrumb when rootFolderId changes
+  useEffect(() => {
+    setBreadcrumb([{ id: rootFolderId, name: rootFolderName || "My Drive" }]);
+  }, [rootFolderId, rootFolderName]);
+
   const fetchContents = useCallback(async (folderId?: string) => {
+    if (!rootFolderId) {
+      setFiles([]);
+      setFolders([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -45,7 +60,7 @@ export default function FileSidebar({ selectedFileId, onSelectFile }: FileSideba
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [rootFolderId]);
 
   useEffect(() => {
     fetchContents(currentFolderId);
@@ -219,9 +234,15 @@ export default function FileSidebar({ selectedFileId, onSelectFile }: FileSideba
 
         {!loading && !error && folders.length === 0 && files.length === 0 && (
           <div className="px-4 py-8 text-center text-xs text-gray-400">
-            No files found.
-            <br />
-            Create one to get started.
+            {!rootFolderId ? (
+              <>Configure your campaign folder to browse files.</>
+            ) : (
+              <>
+                No files found.
+                <br />
+                Create one to get started.
+              </>
+            )}
           </div>
         )}
 

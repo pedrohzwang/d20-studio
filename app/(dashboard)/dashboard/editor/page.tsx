@@ -7,9 +7,10 @@ import Toolbar, { SaveStatus } from "@/components/editor/Toolbar";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import { DriveFile } from "@/lib/storage/types";
 import { Spinner } from "@heroui/react";
+import { useDashboardCampaignConfig } from "../../layout";
 
-// Dynamically import so CodeMirror never renders on the server
-const MarkdownEditor = dynamic(() => import("@/components/editor/MarkdownEditor"), {
+// Dynamically import so Tiptap never renders on the server
+const RichTextEditor = dynamic(() => import("@/components/editor/RichTextEditor"), {
     ssr: false,
     loading: () => (
         <div className="flex-1 flex items-center justify-center">
@@ -21,6 +22,7 @@ const MarkdownEditor = dynamic(() => import("@/components/editor/MarkdownEditor"
 const AUTOSAVE_DELAY_MS = 2000;
 
 export default function EditorPage() {
+    const { config } = useDashboardCampaignConfig();
     const [selectedFile, setSelectedFile] = useState<DriveFile | null>(null);
     const [content, setContent] = useState("");
     const [loadingContent, setLoadingContent] = useState(false);
@@ -137,7 +139,12 @@ export default function EditorPage() {
     // ------------------------------------------------------------------
     return (
         <div className="flex h-[calc(100vh-4rem)]">
-            <FileSidebar selectedFileId={selectedFile?.id ?? null} onSelectFile={setSelectedFile} />
+            <FileSidebar
+                selectedFileId={selectedFile?.id ?? null}
+                onSelectFile={setSelectedFile}
+                rootFolderId={config?.campaignFolderId}
+                rootFolderName={config?.campaignFolderName}
+            />
 
             <div className="flex-1 flex flex-col overflow-hidden">
                 {!selectedFile ? (
@@ -167,7 +174,7 @@ export default function EditorPage() {
                             saveStatus={saveStatus}
                             onSave={handleManualSave}
                         />
-                        <MarkdownEditor content={content} onChange={handleChange} />
+                        <RichTextEditor content={content} onChange={handleChange} />
                     </>
                 )}
             </div>

@@ -104,40 +104,96 @@ User → Next.js Frontend → API Routes → Google Drive API
 
 ---
 
-### Sprint 1.2: Editor Básico de Markdown
+### Sprint 1.2: Editor de Texto Livre
 **Duração**: 3-4 dias
 
 #### Objetivos
-- Editor de Markdown funcional
-- Leitura e escrita de arquivos do Drive
+- Editor de texto livre funcional (sem necessidade de escrever Markdown)
+- Leitura e escrita de arquivos do Drive (salva como .md, exibe como texto livre)
 - Interface básica de navegação
+
+#### Abordagem
+> O usuário escreve em texto livre, sem se preocupar com sintaxe Markdown.
+> Ao salvar, o conteúdo é convertido e persistido como Markdown no Google Drive.
+> Ao abrir, o Markdown é convertido de volta para exibição em texto livre no editor.
 
 #### Tarefas
 1. **Interface de Navegação**
-   - [x] Criar sidebar com lista de arquivos do Drive
-   - [x] Implementar navegação de pastas
-   - [x] Adicionar filtro por tipo de arquivo (.md)
-   - [x] Estado de "arquivo selecionado"
-   - [x] Loading states para operações
+   - [ ] Criar sidebar com lista de arquivos do Drive
+   - [ ] Implementar navegação de pastas
+   - [ ] Adicionar filtro por tipo de arquivo (.md)
+   - [ ] Estado de "arquivo selecionado"
+   - [ ] Loading states para operações
 
-2. **Editor de Markdown**
-   - [x] Integrar Monaco Editor ou CodeMirror (usando CodeMirror via @uiw/react-codemirror)
-   - [x] Configurar syntax highlighting para Markdown
-   - [x] Implementar auto-save (debounced após 2s de inatividade)
-   - [x] Botão manual "Salvar"
-   - [x] Indicador de "salvando..." / "salvo"
-   - [ ] Preview de Markdown (opcional para MVP — skipped for MVP)
+2. **Editor de Texto Livre**
+   - [ ] Integrar editor rich-text (ex: Tiptap, Lexical ou similar)
+   - [ ] Configurar toolbar básica (negrito, itálico, headings, listas)
+   - [ ] Implementar conversão texto livre → Markdown ao salvar
+   - [ ] Implementar conversão Markdown → texto livre ao abrir
+   - [ ] Implementar auto-save (debounced após 2s de inatividade)
+   - [ ] Botão manual "Salvar"
+   - [ ] Indicador de "salvando..." / "salvo"
 
 3. **Operações CRUD Básicas**
-   - [x] Criar novo arquivo
-   - [x] Abrir arquivo existente
-   - [x] Salvar alterações
-   - [x] Deletar arquivo (com confirmação)
-   - [x] Renomear arquivo
+   - [ ] Criar novo arquivo
+   - [ ] Abrir arquivo existente
+   - [ ] Salvar alterações (texto livre → Markdown → Drive)
+   - [ ] Deletar arquivo (com confirmação)
+   - [ ] Renomear arquivo
 
 #### Entregáveis
 - Editor funcional que lê/escreve no Google Drive
-- Usuário consegue navegar, criar, editar e salvar arquivos .md
+- Usuário escreve em texto livre, arquivos persistidos como Markdown
+- Experiência transparente: usuário não precisa saber Markdown
+
+---
+
+### Sprint 1.3: Configuração de Campanhas e Scoped Drive Access
+**Duração**: 2-3 dias
+**Prioridade**: 🔴 Execução Imediata
+
+#### Objetivos
+- Modal de configuração de path de campanhas no Google Drive
+- Persistência da configuração em localStorage (formato JSON)
+- Dashboard exibe contagem de campanhas (pastas no path configurado)
+- Navegação de arquivos restrita ao path de campanhas
+
+#### Abordagem
+> Ao entrar na aplicação, se o path de campanhas não estiver configurado na localStorage, exibir modal para o usuário configurar.
+> Se houver erro ao ler da localStorage ou ao acessar o path no Drive, reexibir a modal silenciosamente (sem mensagem de erro).
+> O path configurado define a pasta raiz para todas as operações de listagem e navegação.
+> A contagem de subpastas nesse path representa o número de campanhas do usuário.
+
+#### Tarefas
+1. **Modal de Configuração de Path**
+   - [ ] Criar componente modal de configuração de path de campanhas
+   - [ ] Permitir que o usuário navegue/selecione uma pasta do Drive
+   - [ ] Salvar path selecionado na localStorage em formato JSON (`{ campaignPath: "...", ... }`)
+   - [ ] Exibir modal automaticamente ao detectar ausência do path ou erro silencioso
+   - [ ] Não exibir nenhuma mensagem de erro ao usuário (reexibir modal silenciosamente)
+
+2. **Persistência e Validação**
+   - [ ] Ler configuração da localStorage ao iniciar a aplicação
+   - [ ] Validar se o path salvo ainda existe/é acessível no Drive
+   - [ ] Em caso de erro (JSON inválido, path inexistente, erro de API), reexibir modal
+   - [ ] Estrutura JSON extensível para futuras configurações
+
+3. **Dashboard - Contagem de Campanhas**
+   - [ ] Ao entrar no Dashboard, contar subpastas no path de campanhas
+   - [ ] Exibir número de campanhas com descritivo explicativo para o usuário
+   - [ ] Atualizar contagem ao alterar path de campanhas
+
+4. **Scoped Drive Navigation**
+   - [ ] Com path configurado, abrir aplicação sempre nesta pasta
+   - [ ] Sem path configurado, não exibir nenhum item na listagem de arquivos
+   - [ ] Toda navegação de arquivos/pastas restrita ao path de campanhas
+   - [ ] Não espelhar todo o Drive do usuário — apenas o path relevante
+
+#### Entregáveis
+- Modal de configuração funcional e silenciosa em caso de erro
+- Configuração persistida em localStorage (JSON extensível)
+- Dashboard com contagem de campanhas
+- Navegação de arquivos restrita ao path de campanhas
 
 ---
 
@@ -969,22 +1025,22 @@ SENTRY_DSN=your-sentry-dsn
 
 ### Must Have (Blocker)
 - [x] Autenticação funcional
-- [x] Editor de Markdown
-- [x] Salvar no Google Drive
-- [x] Chat com IA
-- [x] Contexto básico funcionando
-- [x] IA consegue criar documentos
+- [ ] Configuração de path de campanhas no Drive
+- [ ] Editor de texto livre (salva como Markdown)
+- [ ] Salvar no Google Drive
+- [ ] Chat com IA
+- [ ] Contexto básico funcionando
+- [ ] IA consegue criar documentos
 - [x] Mobile responsivo
 
 ### Should Have (Importante)
-- [x] Auto-save
-- [x] Extração de metadata automática
-- [x] Templates de documentos
+- [ ] Auto-save
+- [ ] Extração de metadata automática
+- [ ] Templates de documentos
 - [x] Error handling robusto
 - [x] Loading states
 
 ### Nice to Have (Pode ficar pós-MVP)
-- [ ] Preview de Markdown
 - [ ] Atalhos de teclado avançados
 - [ ] Dark/Light mode toggle
 - [ ] Export completo
@@ -1107,11 +1163,13 @@ Mês 8+:      MCP + Vector Store (opcional)
 
 ### Funcionalidades
 - [x] Login com Google
-- [x] Listar arquivos do Drive
-- [x] Criar novo arquivo .md
-- [x] Editar arquivo existente
-- [x] Salvar no Drive (manual e auto-save)
-- [x] Deletar arquivo
+- [ ] Configurar path de campanhas no Drive (modal de configuração)
+- [ ] Contagem de campanhas (pastas) no Dashboard
+- [ ] Listar arquivos do Drive (scoped ao path de campanhas)
+- [ ] Criar novo arquivo
+- [ ] Editar arquivo existente (editor de texto livre)
+- [ ] Salvar no Drive como Markdown (manual e auto-save)
+- [ ] Deletar arquivo
 - [ ] Chat com Claude
 - [ ] IA cria documentos via chat
 - [ ] IA edita documentos via chat
@@ -1156,7 +1214,7 @@ Mês 8+:      MCP + Vector Store (opcional)
 
 ---
 
-**Versão do Documento**: 1.0  
-**Última Atualização**: 21/01/2026  
+**Versão do Documento**: 1.1  
+**Última Atualização**: 15/04/2026  
 **Autor**: Documentação gerada para D20 Studio  
-**Status**: 📋 Planejamento Completo - Pronto para Implementação
+**Status**: 📋 Sprint 1.2 & 1.3 em andamento — Editor de texto livre + Configuração de campanhas
