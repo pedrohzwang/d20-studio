@@ -76,7 +76,7 @@ d20-studio/
 │   ├── layout.tsx          # Root layout
 │   ├── page.tsx            # Home page
 │   └── providers.tsx       # App providers
-├── components/
+├── components/j
 │   └── layout/             # Layout components
 │       └── Header.tsx
 ├── docs/                   # Documentation
